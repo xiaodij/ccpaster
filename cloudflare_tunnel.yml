@@ -1,0 +1,7 @@
+tunnel: fff628e3-6194-44c7-a0e8-8864b6d7a4cd
+credentials-file: /etc/cloudflared/credentials/fff628e3-6194-44c7-a0e8-8864b6d7a4cd.json
+
+ingress:
+  - hostname: ccpaster.xjpc.ca
+    service: http://ccpaster-app:8032
+  - service: http_status:404

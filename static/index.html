@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>claudypasta — Claude Code Output to Email-Ready HTML</title>
+  <meta name="description" content="Paste Claude Code terminal output and instantly convert it to clean, formatted HTML for email. Tables, code blocks, markdown — all handled. Runs 100% in your browser, nothing sent to any server.">
+  <meta name="keywords" content="Claude Code, Claude Code formatter, Claude Code output, Claude Code to email, Claude Code to HTML, terminal output formatter, copy paste Claude Code, claudypasta">
+  <meta property="og:title" content="claudypasta — Claude Code Output to Email-Ready HTML">
+  <meta property="og:description" content="Paste Claude Code terminal output and instantly get clean formatted HTML for Gmail, Outlook, and more. 100% client-side, no data ever leaves your browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ccpaster.xjpc.ca">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ccpaster.xjpc.ca">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #2d333b;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #c9a0ff;
+    }
+    header span {
+      font-size: 0.85rem;
+      color: #7d8590;
+    }
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 768px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+    .panel {
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .panel-header h2 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    textarea {
+      width: 100%;
+      height: 400px;
+      background: #161b22;
+      border: 1px solid #2d333b;
+      border-radius: 8px;
+      color: #e1e4e8;
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      padding: 16px;
+      resize: vertical;
+      outline: none;
+      tab-size: 4;
+    }
+    textarea:focus {
+      border-color: #c9a0ff;
+      box-shadow: 0 0 0 2px rgba(201, 160, 255, 0.15);
+    }
+    textarea::placeholder {
+      color: #484f58;
+    }
+    .preview-box {
+      width: 100%;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      background: #ffffff;
+      border: 1px solid #2d333b;
+      border-radius: 8px;
+      padding: 16px;
+      color: #1f2328;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .preview-box table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 8px 0;
+    }
+    .preview-box th, .preview-box td {
+      border: 1px solid #d0d7de;
+      padding: 6px 12px;
+      text-align: left;
+    }
+    .preview-box th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    .preview-box code {
+      background: #eff1f3;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', 'Cascadia Code', monospace;
+      font-size: 0.9em;
+    }
+    .preview-box pre {
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      padding: 12px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+    .preview-box pre code {
+      background: none;
+      padding: 0;
+    }
+    .preview-box h1, .preview-box h2, .preview-box h3 {
+      margin: 16px 0 8px;
+      color: #1f2328;
+    }
+    .preview-box h1 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: 4px; }
+    .preview-box h2 { font-size: 1.3em; }
+    .preview-box h3 { font-size: 1.1em; }
+    .preview-box ul, .preview-box ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+    .preview-box li { margin: 4px 0; }
+    .preview-box p { margin: 6px 0; }
+    .preview-box blockquote {
+      border-left: 3px solid #d0d7de;
+      padding-left: 12px;
+      color: #656d76;
+      margin: 8px 0;
+    }
+    .preview-box hr {
+      border: none;
+      border-top: 1px solid #d0d7de;
+      margin: 12px 0;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 8px 16px;
+      border: 1px solid #2d333b;
+      border-radius: 6px;
+      background: #21262d;
+      color: #e1e4e8;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    button:hover {
+      background: #30363d;
+      border-color: #444c56;
+    }
+    .btn-primary {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #6d28d9;
+    }
+    .btn-success {
+      background: #238636;
+      border-color: #238636;
+      color: white;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #238636;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .info-bar {
+      margin-top: 16px;
+      padding: 12px;
+      background: #161b22;
+      border: 1px solid #2d333b;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #7d8590;
+      line-height: 1.6;
+    }
+    .info-bar strong { color: #c9a0ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><em style="font-style:italic;font-weight:700;">claudypasta</em></h1>
+      <span>Claude Code output &rarr; email-ready HTML</span>
+      <div style="flex:1"></div>
+    </header>
+
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 14px;background:#1a1e2a;border:1px solid #2d333b;border-radius:8px;font-size:0.82rem;color:#8b949e;">
+      <span style="color:#3fb950;font-size:1.1em;">&#x1f512;</span>
+      <span><strong style="color:#c9d1d9;">100% local.</strong> All conversion runs in your browser. No data is sent to any server &mdash; ever.</span>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Paste Claude Code Output</h2>
+          <button onclick="clearInput()">Clear</button>
+        </div>
+        <textarea id="input" placeholder="Paste Claude Code output here...&#10;&#10;Supports:&#10;  - Box-drawing tables (┌─┬┐│├┤└┴┘)&#10;  - Markdown tables (| col | col |)&#10;  - Markdown formatting (headers, bold, code, lists)&#10;  - ANSI color codes (stripped)&#10;  - Extra whitespace cleanup" spellcheck="false"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Preview</h2>
+          <div class="actions">
+            <button class="btn-primary" onclick="copyRich()">Copy for Email</button>
+            <button onclick="copyHtml()">Copy HTML</button>
+          </div>
+        </div>
+        <div class="preview-box" id="preview">
+          <p style="color:#656d76; font-style:italic;">Formatted output will appear here...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-bar">
+      <strong>How to use:</strong> Paste Claude Code output on the left. The right panel shows the formatted result.
+      Click <strong>Copy for Email</strong> to copy rich text you can paste directly into Gmail, Outlook, etc.
+      Click <strong>Copy HTML</strong> to get the raw HTML source.
+      <br>
+      <strong>Supported formats:</strong> Box-drawing tables (Unicode), Markdown pipe tables, headers (#), bold/italic (**/_),
+      code blocks (```), inline code (`), bullet/numbered lists, blockquotes (>), horizontal rules (---), and ANSI escape codes (stripped).
+    </div>
+
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #2d333b;text-align:center;font-size:0.75rem;color:#484f58;">
+      <em style="font-style:italic;font-weight:600;">claudypasta</em> is open source &mdash; <a href="https://github.com/xiaodij/ccpaster" style="color:#7d8590;">github.com/xiaodij/ccpaster</a>
+      <br>Fork it, host it yourself, improve it.
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="converter.js"></script>
+  <script>
+    const inputEl = document.getElementById('input');
+    const previewEl = document.getElementById('preview');
+
+    inputEl.addEventListener('input', () => {
+      const text = inputEl.value;
+      if (!text.trim()) {
+        previewEl.innerHTML = '<p style="color:#656d76; font-style:italic;">Formatted output will appear here...</p>';
+        return;
+      }
+      previewEl.innerHTML = convertCCOutput(text);
+    });
+
+    function clearInput() {
+      inputEl.value = '';
+      previewEl.innerHTML = '<p style="color:#656d76; font-style:italic;">Formatted output will appear here...</p>';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    async function copyRich() {
+      const html = previewEl.innerHTML;
+      const plain = previewEl.innerText;
+      try {
+        const htmlBlob = new Blob([getEmailHtml()], { type: 'text/html' });
+        const textBlob = new Blob([plain], { type: 'text/plain' });
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
+        ]);
+        showToast('Copied rich text for email!');
+      } catch (e) {
+        // Fallback: select and copy the preview element
+        const range = document.createRange();
+        range.selectNodeContents(previewEl);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        document.execCommand('copy');
+        sel.removeAllRanges();
+        showToast('Copied (fallback)!');
+      }
+    }
+
+    async function copyHtml() {
+      try {
+        await navigator.clipboard.writeText(getEmailHtml());
+        showToast('Copied HTML source!');
+      } catch (e) {
+        showToast('Failed to copy');
+      }
+    }
+
+    function getEmailHtml() {
+      const body = previewEl.innerHTML;
+      return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5;color:#1f2328;">${body}</div>`;
+    }
+  </script>
+</body>
+</html>

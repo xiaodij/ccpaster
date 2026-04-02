@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    container_name: ccpaster-app
+    restart: unless-stopped
+    environment:
+      - PORT=8032
+    networks:
+      - ccpaster
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: ccpaster-tunnel
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflare_tunnel.yml:/etc/cloudflared/config.yml:ro
+      - /Users/xiaodijin/.cloudflared/fff628e3-6194-44c7-a0e8-8864b6d7a4cd.json:/etc/cloudflared/credentials/fff628e3-6194-44c7-a0e8-8864b6d7a4cd.json:ro
+    depends_on:
+      - app
+    networks:
+      - ccpaster
+
+networks:
+  ccpaster:
+    driver: bridge
